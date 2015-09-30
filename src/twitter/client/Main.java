@@ -6,13 +6,16 @@ public class Main {
 
 	public static void main(String[] args) {
 		
-		TwitterW tw = new TwitterW();
-		
-		tw.init();
-		
 		TimelineClient client = new TimelineClient();
 		Twitter twitter = client.init();
 		
-		client.getUserTimeline(twitter);
+		TwitterW tw = new TwitterW();
+		tw.init();
+		
+//		tw.refresh();
+		
+//		client.getHomeTimeline(twitter);
+//		client.getUserTimeline(twitter, "imrankhanworld");
+//		client.updateStatus(twitter, "Tweet with Twitter4J");
 	}
 }
