@@ -1,9 +1,12 @@
 package twitter.client;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -13,6 +16,7 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
@@ -26,9 +30,8 @@ public class TwitterW extends JFrame{
 	private JLabel picture;
 	private JTextField textField;
 	private JScrollPane scrollPane;
-	private JList list;
+	private JList<Status> list;
 	
-	private String pictureUrl;
 	
 	public TwitterW() {
 		client = new TimelineClient();
@@ -48,10 +51,13 @@ public class TwitterW extends JFrame{
 		
 		textField = new JTextField();
 		
-		list = new JList<>();
-		scrollPane = new JScrollPane();
+//		String[] data = {"toto", "titi", "tata"};
+//		list = new JList<String>(data);
+		list = refresh();
+		
+		scrollPane = new JScrollPane(list);
 		scrollPane.setPreferredSize(new Dimension(700, 410));
-		scrollPane.add(list);
+		scrollPane.setBackground(Color.BLUE);
 		
 		this.setLayout(new BorderLayout());
 		this.getContentPane().add(textField, BorderLayout.CENTER);
@@ -83,7 +89,18 @@ public class TwitterW extends JFrame{
 		return img;
 	}
 
-	public void refresh() {
-		client.getHomeTimeline(twitter);
+	public JList<Status> refresh() {
+		List<Status> statuses = null;
+		statuses = client.getHomeTimeline(twitter);
+		
+		ArrayList<String> data = new ArrayList<String>();
+		
+		for (Status s : statuses) {
+			data.add(s.getText());
+		}
+		
+		JList<Status> list = new JList(data.toArray());
+		
+		return list;
 	}
 }
