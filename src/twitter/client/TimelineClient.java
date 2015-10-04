@@ -52,12 +52,12 @@ public class TimelineClient {
 			e.printStackTrace();
 		}
 
-		 System.out.println("Showing home timeline.");
-		
-		 for (Status status : statuses) {
-		 System.out.println(status.getUser().getName() + ":" +
-		 status.getText());
-		 }
+//		 System.out.println("Showing home timeline.");
+//		
+//		 for (Status status : statuses) {
+//		 System.out.println(status.getUser().getName() + ":" +
+//		 status.getText());
+//		 }
 
 		return statuses;
 	}
@@ -78,13 +78,6 @@ public class TimelineClient {
 			e.printStackTrace();
 		}
 
-		// System.out.println("Showing home timeline.");
-		//
-		// for (Status status : statuses) {
-		// System.out.println(status.getUser().getName() + ":" +
-		// status.getText());
-		// }
-
 		return statuses;
 	}
 
@@ -92,8 +85,9 @@ public class TimelineClient {
 	 * Update status
 	 * @param twitter Twitter instance
 	 * @param status The status to post
+	 * @return 
 	 */
-	public void updateStatus(Twitter twitter, String status) {
+	public String updateStatus(Twitter twitter, String status) {
 		Status st = null;
 
 		try {
@@ -102,7 +96,7 @@ public class TimelineClient {
 			e.printStackTrace();
 		}
 
-		System.out.println("Successfully updated the status to [" + st.getText() + "].");
+		return st.getText();
 	}
 
 	/**

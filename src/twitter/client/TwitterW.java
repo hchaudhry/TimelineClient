@@ -3,16 +3,20 @@ package twitter.client;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
@@ -27,10 +31,14 @@ public class TwitterW extends JFrame{
 	private TimelineClient client;
 	
 	private JButton refresh;
+	private JButton post;
 	private JLabel picture;
 	private JTextField textField;
 	private JScrollPane scrollPane;
-	private JList<Status> list;
+	private JList<String> list;
+	private DefaultListModel<String> tweets;
+	private JPanel textPanel;
+	
 	
 	
 	public TwitterW() {
@@ -50,17 +58,32 @@ public class TwitterW extends JFrame{
 		picture.setIcon(getUserPicture());
 		
 		textField = new JTextField();
+		textField.setPreferredSize(new Dimension(500, 410));
+		post = new JButton("Post");
 		
-//		String[] data = {"toto", "titi", "tata"};
-//		list = new JList<String>(data);
-		list = refresh();
+		post.addActionListener(new ActionListener()
+		{
+		  public void actionPerformed(ActionEvent e)
+		  {
+		    postStatus();
+		  }
+		});
+		
+		textPanel = new JPanel();
+		textPanel.setLayout(new BorderLayout());
+		textPanel.add(textField, BorderLayout.WEST);
+		textPanel.add(post, BorderLayout.EAST);
+		
+		tweets = new DefaultListModel<>();
+		tweets = refresh();
+		list = new JList(tweets);
 		
 		scrollPane = new JScrollPane(list);
 		scrollPane.setPreferredSize(new Dimension(700, 410));
 		scrollPane.setBackground(Color.BLUE);
 		
 		this.setLayout(new BorderLayout());
-		this.getContentPane().add(textField, BorderLayout.CENTER);
+		this.getContentPane().add(textPanel, BorderLayout.CENTER);
 	    this.getContentPane().add(scrollPane, BorderLayout.NORTH);
 	    this.getContentPane().add(picture, BorderLayout.WEST);
 	    this.getContentPane().add(refresh, BorderLayout.EAST);
@@ -89,18 +112,22 @@ public class TwitterW extends JFrame{
 		return img;
 	}
 
-	public JList<Status> refresh() {
+	public DefaultListModel<String> refresh() {
 		List<Status> statuses = null;
 		statuses = client.getHomeTimeline(twitter);
 		
-		ArrayList<String> data = new ArrayList<String>();
+		DefaultListModel<String> data = new DefaultListModel<String>();
 		
 		for (Status s : statuses) {
-			data.add(s.getText());
+			data.addElement(s.getText());
 		}
 		
-		JList<Status> list = new JList(data.toArray());
-		
-		return list;
+		return data;
+	}
+	
+	public void postStatus() {
+		String msg = textField.getText();
+		String status = client.updateStatus(twitter, msg);
+		tweets.insertElementAt(status, 0);
 	}
 }
