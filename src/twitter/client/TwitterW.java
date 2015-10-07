@@ -2,12 +2,14 @@ package twitter.client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -16,82 +18,110 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
 
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
 
-public class TwitterW extends JFrame{
+public class TwitterW extends JFrame {
 
 	private Twitter twitter;
 	private TimelineClient client;
-	
+
 	private JButton refresh;
 	private JButton post;
 	private JLabel picture;
 	private JTextField textField;
 	private JScrollPane scrollPane;
-	private JList<String> list;
-	private DefaultListModel<String> tweets;
+	private JList<Status> list;
+	private DefaultListModel<Status> tweets;
 	private JPanel textPanel;
-	
-	
-	
+	private JButton friends;
+
 	public TwitterW() {
 		client = new TimelineClient();
 		twitter = client.init();
 	}
-	
+
+	/**
+	 * Initial the window
+	 */
 	public void init() {
 		this.setTitle("Twitter RESTFul Client");
 		this.setSize(700, 500);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		refresh = new JButton("Update");
-		
+
+		refresh.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				tweets.clear();
+				tweets = refresh();
+				list.setModel(tweets);
+			}
+		});
+
 		picture = new JLabel();
 		picture.setIcon(getUserPicture());
-		
+
 		textField = new JTextField();
-		textField.setPreferredSize(new Dimension(500, 410));
+		textField.setPreferredSize(new Dimension(400, 410));
 		post = new JButton("Post");
-		
-		post.addActionListener(new ActionListener()
-		{
-		  public void actionPerformed(ActionEvent e)
-		  {
-		    postStatus();
-		  }
+
+		post.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				postStatus();
+			}
 		});
 		
+		friends = new JButton("Friends");
+		
+		friends.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				getFriends();
+			}
+		});
+
 		textPanel = new JPanel();
 		textPanel.setLayout(new BorderLayout());
 		textPanel.add(textField, BorderLayout.WEST);
-		textPanel.add(post, BorderLayout.EAST);
-		
-		tweets = new DefaultListModel<>();
+		textPanel.add(post, BorderLayout.CENTER);
+		textPanel.add(friends, BorderLayout.EAST);
+
+		tweets = new DefaultListModel<Status>();
 		tweets = refresh();
 		list = new JList(tweets);
-		
+		ListCellRenderer renderer = new CustomCellRenderer();
+		list.setCellRenderer(renderer);
+
 		scrollPane = new JScrollPane(list);
 		scrollPane.setPreferredSize(new Dimension(700, 410));
 		scrollPane.setBackground(Color.BLUE);
-		
+
 		this.setLayout(new BorderLayout());
 		this.getContentPane().add(textPanel, BorderLayout.CENTER);
-	    this.getContentPane().add(scrollPane, BorderLayout.NORTH);
-	    this.getContentPane().add(picture, BorderLayout.WEST);
-	    this.getContentPane().add(refresh, BorderLayout.EAST);
-		
+		this.getContentPane().add(scrollPane, BorderLayout.NORTH);
+		this.getContentPane().add(picture, BorderLayout.WEST);
+		this.getContentPane().add(refresh, BorderLayout.EAST);
+
 		this.setVisible(true);
 	}
-	
-	public ImageIcon getUserPicture(){
+
+	/**
+	 * Get the picture of the user
+	 * To be used in window
+	 * @return ImageIcon the icon of the user's picture
+	 */
+	public ImageIcon getUserPicture() {
 		User user = null;
 		try {
 			user = twitter.showUser(twitter.getId());
@@ -100,7 +130,7 @@ public class TwitterW extends JFrame{
 		} catch (TwitterException e) {
 			e.printStackTrace();
 		}
-		
+
 		String urlText = user.getProfileImageURL();
 		URL url = null;
 		try {
@@ -112,22 +142,65 @@ public class TwitterW extends JFrame{
 		return img;
 	}
 
-	public DefaultListModel<String> refresh() {
+	/**
+	 * Refresh user timeline
+	 * @return List of Status
+	 */
+	public DefaultListModel<Status> refresh() {
 		List<Status> statuses = null;
 		statuses = client.getHomeTimeline(twitter);
-		
-		DefaultListModel<String> data = new DefaultListModel<String>();
-		
+
+		DefaultListModel<Status> data = new DefaultListModel<Status>();
+
 		for (Status s : statuses) {
-			data.addElement(s.getText());
+			data.addElement(s);
 		}
-		
+
 		return data;
 	}
-	
+
+	/**
+	 * Post a new status
+	 */
 	public void postStatus() {
 		String msg = textField.getText();
-		String status = client.updateStatus(twitter, msg);
+		Status status = client.updateStatus(twitter, msg);
 		tweets.insertElementAt(status, 0);
+	}
+	
+	/**
+	 * Used to show the user's friends in a combo box
+	 * When a friend is selected his timeline is fetched
+	 */
+	public void getFriends() {
+		
+		List<User> users = client.getUserFriends(twitter);
+		
+		String[] friends = new String[users.size()];
+		for (int i = 0; i < users.size(); i++) {
+			friends[i] = users.get(i).getScreenName();
+		}
+		
+		String selectedFriend = (String) JOptionPane.showInputDialog(null,
+		"Please select a friend :",
+		null,
+		JOptionPane.QUESTION_MESSAGE,
+		null,
+		friends,
+		friends[0]);
+		
+		selectedFriend = selectedFriend.replace("@", "");
+		
+		List<Status> friendStatus = client.getUserTimeline(twitter, selectedFriend);
+		
+		DefaultListModel<Status> data = new DefaultListModel<Status>();
+
+		for (Status s : friendStatus) {
+			data.addElement(s);
+		}
+
+		tweets.clear();
+		tweets = data;
+		list.setModel(tweets);
 	}
 }

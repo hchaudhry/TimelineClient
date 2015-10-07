@@ -1,5 +1,6 @@
 package twitter.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import twitter4j.Status;
@@ -7,15 +8,17 @@ import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
+import twitter4j.api.UsersResources;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class TimelineClient {
 
-	private final static String CONSUMER_KEY = "xxx";
-	private final static String CONSUMER_KEY_SECRET = "xxx";
+	private final static String CONSUMER_KEY = "IMzG6rrtvtsootv3ByTvnZY0H";
+	private final static String CONSUMER_KEY_SECRET = "hnpedcqpi2auYh9eJaoCNW4s4RfmIu0MGmPo3P9ubpFGSYiuZq";
 
-	private final static String ACCESS_TOKEN = "xxx";
-	private final static String ACCESS_TOKEN_SECRET = "xxx";
+	private final static String ACCESS_TOKEN = "3862657161-RuPQkMPDDgdlWcAqJPibgZ62Jbb2V8IJgJYvyvJ";
+	private final static String ACCESS_TOKEN_SECRET = "yoGMKOlmZXDTyFelbRxBNpAyyLf2psxeVnADbN6pRNSDQ";
 
 	public TimelineClient() {
 
@@ -52,13 +55,6 @@ public class TimelineClient {
 			e.printStackTrace();
 		}
 
-//		 System.out.println("Showing home timeline.");
-//		
-//		 for (Status status : statuses) {
-//		 System.out.println(status.getUser().getName() + ":" +
-//		 status.getText());
-//		 }
-
 		return statuses;
 	}
 
@@ -87,7 +83,7 @@ public class TimelineClient {
 	 * @param status The status to post
 	 * @return 
 	 */
-	public String updateStatus(Twitter twitter, String status) {
+	public Status updateStatus(Twitter twitter, String status) {
 		Status st = null;
 
 		try {
@@ -96,7 +92,7 @@ public class TimelineClient {
 			e.printStackTrace();
 		}
 
-		return st.getText();
+		return st;
 	}
 
 	/**
@@ -127,5 +123,28 @@ public class TimelineClient {
 		} catch (TwitterException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Get friends of user
+	 * @param twitter Twitter instance
+	 * @return friends List of User
+	 */
+	public List<User> getUserFriends(Twitter twitter) {
+		User u = null;
+		List<User> friends = new ArrayList<User>();
+		try {
+			u = twitter.showUser(twitter.getScreenName());
+		} catch (IllegalStateException | TwitterException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			friends = twitter.getFriendsList(u.getId(), -1);
+		} catch (TwitterException e) {
+			e.printStackTrace();
+		}
+		
+		return friends;
 	}
 }
