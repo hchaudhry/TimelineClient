@@ -3,6 +3,7 @@ package twitter.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import twitter4j.Paging;
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
@@ -70,11 +71,11 @@ public class TimelineClient {
 	 * @param twitter Twitter instance
 	 * @return A list of statuses
 	 */
-	public List<Status> getHomeTimeline(Twitter twitter) {
+	public List<Status> getHomeTimeline(Twitter twitter, int page, int tweetsNumber) {
 
 		List<Status> statuses = null;
 		try {
-			statuses = twitter.getHomeTimeline();
+			statuses = twitter.getHomeTimeline(new Paging(page, tweetsNumber));
 		} catch (TwitterException e) {
 			e.printStackTrace();
 		}

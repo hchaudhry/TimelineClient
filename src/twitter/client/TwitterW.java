@@ -1,14 +1,17 @@
 package twitter.client;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -40,7 +43,15 @@ public class TwitterW extends JFrame {
 	private JList<Status> list;
 	private DefaultListModel<Status> tweets;
 	private JPanel textPanel;
+	private JPanel buttonBar;
 	private JButton friends;
+	
+	private JPanel buttonsScrollPane;
+	private JLabel pageLabel;
+	
+	private static final int PAGE_NUMBER = 1;
+	private static final int TWEETS_NUMBER = 20;
+	private int pageCounter = 1;
 
 	public TwitterW() {
 		client = new TimelineClient();
@@ -62,7 +73,7 @@ public class TwitterW extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				tweets.clear();
-				tweets = refresh();
+				tweets = refresh(PAGE_NUMBER);
 				list.setModel(tweets);
 			}
 		});
@@ -88,6 +99,48 @@ public class TwitterW extends JFrame {
 				getFriends();
 			}
 		});
+		
+		pageLabel = new JLabel("Page : " + pageCounter);
+		buttonBar = new JPanel(new GridLayout(1, -1));
+		buttonBar.add(pageLabel);
+		buttonBar.add(new JButton(new AbstractAction("<<") {
+
+			public void actionPerformed(ActionEvent e) {
+				pageCounter = 1;
+				tweets = refresh(PAGE_NUMBER);
+				list.setModel(tweets);
+				pageLabel.setText("Page : " + pageCounter);
+			}
+		}));
+		buttonBar.add(new JButton(new AbstractAction("<") {
+
+			public void actionPerformed(ActionEvent e) {
+				if (pageCounter == 1) {
+					return;
+				}
+				pageCounter -= 1;
+				tweets = refresh(pageCounter);
+				list.setModel(tweets);
+				pageLabel.setText("Page : " + pageCounter);
+			}
+		}));
+		buttonBar.add(new JButton(new AbstractAction(">") {
+
+			public void actionPerformed(ActionEvent e) {
+				pageCounter += 1;
+				tweets = refresh(pageCounter);
+				list.setModel(tweets);
+				pageLabel.setText("Page : " + pageCounter);
+			}
+		}));
+         /*buttonBar.add(new JButton(new AbstractAction(">>") {
+
+             public void actionPerformed(ActionEvent e) {
+                 page = getMaxPage();
+                 scroll(0);
+             }
+         }));*/
+		
 
 		textPanel = new JPanel();
 		textPanel.setLayout(new BorderLayout());
@@ -96,18 +149,22 @@ public class TwitterW extends JFrame {
 		textPanel.add(friends, BorderLayout.EAST);
 
 		tweets = new DefaultListModel<Status>();
-		tweets = refresh();
+		tweets = refresh(PAGE_NUMBER);
 		list = new JList(tweets);
 		ListCellRenderer renderer = new CustomCellRenderer();
 		list.setCellRenderer(renderer);
 
 		scrollPane = new JScrollPane(list);
 		scrollPane.setPreferredSize(new Dimension(700, 410));
-		scrollPane.setBackground(Color.BLUE);
-
+		
+		buttonsScrollPane = new JPanel();
+		buttonsScrollPane.setLayout(new BorderLayout());
+		buttonsScrollPane.add(scrollPane, BorderLayout.NORTH);
+		buttonsScrollPane.add(buttonBar, BorderLayout.SOUTH);
+		
 		this.setLayout(new BorderLayout());
 		this.getContentPane().add(textPanel, BorderLayout.CENTER);
-		this.getContentPane().add(scrollPane, BorderLayout.NORTH);
+		this.getContentPane().add(buttonsScrollPane, BorderLayout.NORTH);
 		this.getContentPane().add(picture, BorderLayout.WEST);
 		this.getContentPane().add(refresh, BorderLayout.EAST);
 
@@ -144,9 +201,9 @@ public class TwitterW extends JFrame {
 	 * Refresh user timeline
 	 * @return List of Status
 	 */
-	public DefaultListModel<Status> refresh() {
+	public DefaultListModel<Status> refresh(int page) {
 		List<Status> statuses = null;
-		statuses = client.getHomeTimeline(twitter);
+		statuses = client.getHomeTimeline(twitter, page, TWEETS_NUMBER);
 
 		DefaultListModel<Status> data = new DefaultListModel<Status>();
 
@@ -162,6 +219,11 @@ public class TwitterW extends JFrame {
 	 */
 	public void postStatus() {
 		String msg = textField.getText();
+		
+		if (msg == null) {
+			return;
+		}
+		
 		Status status = client.updateStatus(twitter, msg);
 		tweets.insertElementAt(status, 0);
 	}
@@ -219,6 +281,10 @@ public class TwitterW extends JFrame {
 	    
 	    String pin = JOptionPane.showInputDialog(frame,
 	        textPane);
+	    
+	    if (pin == null) {
+	    	return "";
+	    }
 	    
 	    return pin;
 	}
