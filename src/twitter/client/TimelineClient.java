@@ -9,16 +9,14 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
-import twitter4j.api.UsersResources;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class TimelineClient {
 
-	private final static String CONSUMER_KEY = "IMzG6rrtvtsootv3ByTvnZY0H";
-	private final static String CONSUMER_KEY_SECRET = "hnpedcqpi2auYh9eJaoCNW4s4RfmIu0MGmPo3P9ubpFGSYiuZq";
-
-	private final static String ACCESS_TOKEN = "3862657161-RuPQkMPDDgdlWcAqJPibgZ62Jbb2V8IJgJYvyvJ";
-	private final static String ACCESS_TOKEN_SECRET = "yoGMKOlmZXDTyFelbRxBNpAyyLf2psxeVnADbN6pRNSDQ";
+	private final static String CONSUMER_KEY = "xxx";
+	private final static String CONSUMER_KEY_SECRET = "xxx";
 
 	public TimelineClient() {
 
@@ -33,10 +31,36 @@ public class TimelineClient {
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 
 		cb.setDebugEnabled(true).setOAuthConsumerKey(CONSUMER_KEY).setOAuthConsumerSecret(CONSUMER_KEY_SECRET)
-				.setOAuthAccessToken(ACCESS_TOKEN).setOAuthAccessTokenSecret(ACCESS_TOKEN_SECRET);
+				.setOAuthAccessToken(null).setOAuthAccessTokenSecret(null);
 
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		Twitter twitter = tf.getInstance();
+
+		RequestToken requestToken = null;
+
+		try {
+			requestToken = twitter.getOAuthRequestToken("oob");
+		} catch (TwitterException e1) {
+			e1.printStackTrace();
+		}
+
+		AccessToken accessToken = null;
+		while (null == accessToken) {
+			String pin = TwitterW.showPinDialog(requestToken.getAuthenticationURL());
+			try {
+				if (pin.length() > 0) {
+					accessToken = twitter.getOAuthAccessToken(requestToken, pin);
+				} else {
+					accessToken = twitter.getOAuthAccessToken();
+				}
+			} catch (TwitterException te) {
+				if (401 == te.getStatusCode()) {
+					System.out.println("Unable to get the access token.");
+				} else {
+					te.printStackTrace();
+				}
+			}
+		}
 
 		return twitter;
 	}

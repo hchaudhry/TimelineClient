@@ -2,12 +2,9 @@ package twitter.client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -22,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.ListCellRenderer;
 
 import twitter4j.Status;
@@ -202,5 +200,26 @@ public class TwitterW extends JFrame {
 		tweets.clear();
 		tweets = data;
 		list.setModel(tweets);
+	}
+	
+	/**
+	 * Used to show url to get pin
+	 * @param url the url to get the pin
+	 * @return the pin code
+	 */
+	public static String showPinDialog(String url){
+	    JFrame frame = new JFrame("Twitter RESTFul Client");
+	     
+	    JTextPane textPane = new JTextPane();
+	    textPane.setContentType("text/html");
+	    textPane.setText("<html><p>Open this URL in your browser and paste the PIN code below : </p>" + url + "</html>");
+	    textPane.setEditable(false);
+	    textPane.setBackground(null);
+	    textPane.setBorder(null);
+	    
+	    String pin = JOptionPane.showInputDialog(frame,
+	        textPane);
+	    
+	    return pin;
 	}
 }
