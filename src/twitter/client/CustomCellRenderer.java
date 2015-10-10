@@ -30,7 +30,10 @@ public class CustomCellRenderer extends JLabel implements ListCellRenderer {
 			boolean cellHasFocus) {
 		
 		Status status = (Status) value;
-		setText("<html><font color='grey'>"+status.getText()+"</font></html>");
+		setText("<html><body><font color='grey'> <div>"+ status.getUser().getName()
+				+" <font color='#BDBDBD'> @"+ status.getUser().getScreenName() +" . "
+				+ status.getCreatedAt().toString() 
+				+"</font> </div> "+status.getText()+"</font></body></html>");
 
 		if (isSelected) {
 			setBackground(HIGHLIGHT_COLOR);
