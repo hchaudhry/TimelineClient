@@ -63,7 +63,7 @@ public class TwitterW extends JFrame {
 	 */
 	public void init() {
 		this.setTitle("Twitter RESTFul Client");
-		this.setSize(700, 500);
+		this.setSize(800, 600);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -82,7 +82,9 @@ public class TwitterW extends JFrame {
 		picture.setIcon(getUserPicture());
 
 		textField = new JTextField();
-		textField.setPreferredSize(new Dimension(400, 410));
+		textField.setPreferredSize(new Dimension(500, 410));
+		textField.setDocument(new JTextFieldLimit(140));
+		
 		post = new JButton("Post");
 
 		post.addActionListener(new ActionListener() {
@@ -155,7 +157,7 @@ public class TwitterW extends JFrame {
 		list.setCellRenderer(renderer);
 
 		scrollPane = new JScrollPane(list);
-		scrollPane.setPreferredSize(new Dimension(700, 410));
+		scrollPane.setPreferredSize(new Dimension(800, 470));
 		
 		buttonsScrollPane = new JPanel();
 		buttonsScrollPane.setLayout(new BorderLayout());

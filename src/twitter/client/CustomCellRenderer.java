@@ -2,6 +2,10 @@ package twitter.client;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -30,9 +34,19 @@ public class CustomCellRenderer extends JLabel implements ListCellRenderer {
 			boolean cellHasFocus) {
 		
 		Status status = (Status) value;
+		
+		Date date = null;
+		String dateFormated = "";
+		try {
+			date = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy", Locale.ENGLISH).parse(status.getCreatedAt().toString());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		dateFormated = new SimpleDateFormat("MMM d").format(date);
+		
 		setText("<html><body><font color='grey'> <div>"+ status.getUser().getName()
-				+" <font color='#BDBDBD'> @"+ status.getUser().getScreenName() +" . "
-				+ status.getCreatedAt().toString() 
+				+" <font color='#BDBDBD'> @"+ status.getUser().getScreenName() +" - "
+				+ dateFormated 
 				+"</font> </div> "+status.getText()+"</font></body></html>");
 
 		if (isSelected) {
