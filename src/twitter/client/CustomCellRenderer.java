@@ -2,12 +2,15 @@ package twitter.client;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
@@ -42,8 +45,19 @@ public class CustomCellRenderer extends JLabel implements ListCellRenderer {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+		
+		String urlText = status.getUser().getProfileImageURL();
+		URL url = null;
+		try {
+			url = new URL(urlText);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		ImageIcon img = new ImageIcon(url);
+		
 		dateFormated = new SimpleDateFormat("MMM d").format(date);
 		
+		setIcon(img);
 		setText("<html><body><font color='grey'> <div>"+ status.getUser().getName()
 				+" <font color='#BDBDBD'> @"+ status.getUser().getScreenName() +" - "
 				+ dateFormated 
