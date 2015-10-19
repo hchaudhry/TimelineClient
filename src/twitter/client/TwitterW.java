@@ -92,6 +92,7 @@ public class TwitterW extends JFrame {
 		post.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				postStatus();
+				textField.setText("");
 			}
 		});
 		
@@ -137,14 +138,6 @@ public class TwitterW extends JFrame {
 				pageLabel.setText("Page : " + pageCounter);
 			}
 		}));
-         /*buttonBar.add(new JButton(new AbstractAction(">>") {
-
-             public void actionPerformed(ActionEvent e) {
-                 page = getMaxPage();
-                 scroll(0);
-             }
-         }));*/
-		
 
 		textPanel = new JPanel();
 		textPanel.setLayout(new BorderLayout());
@@ -253,19 +246,21 @@ public class TwitterW extends JFrame {
 		friends,
 		friends[0]);
 		
-		selectedFriend = selectedFriend.replace("@", "");
-		
-		List<Status> friendStatus = client.getUserTimeline(twitter, selectedFriend);
-		
-		DefaultListModel<Status> data = new DefaultListModel<Status>();
+		if (selectedFriend != null) {
+			selectedFriend = selectedFriend.replace("@", "");
+			
+			List<Status> friendStatus = client.getUserTimeline(twitter, selectedFriend);
+			
+			DefaultListModel<Status> data = new DefaultListModel<Status>();
 
-		for (Status s : friendStatus) {
-			data.addElement(s);
+			for (Status s : friendStatus) {
+				data.addElement(s);
+			}
+
+			tweets.clear();
+			tweets = data;
+			list.setModel(tweets);
 		}
-
-		tweets.clear();
-		tweets = data;
-		list.setModel(tweets);
 	}
 	
 	/**
